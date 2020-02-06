@@ -1,24 +1,17 @@
-// check for indexedDB browser support
-if (!('indexedDB' in window)) {
-  console.log('This browser doesn\'t support IndexedDB');
-  return;
-}
-
+// Budget Tracker - client side IndexedDb database to be used when offline
+//
 let db;
 
 // create a new db request for a "budget" database.
-const request = window.indexedDB.open("budget", 1);
+const request = indexedDB.open("budget", 1);
 
 request.onupgradeneeded = function(event) {
   const db = event.target.result;
   // create object store called "pending" and set autoIncrement to true
-  const pendingStore = db.createObjectStore("pending", {autoIncrement:true});  
-
-  // Creates a recordIndex that we can query on.
-  pendingStore.createIndex("recordIndex", "record");
+  db.createObjectStore("pending", {autoIncrement:true});  
 };
 
-//
+// Immediately after opening, check for stored data.
 request.onsuccess = function(event) {
   db = event.target.result;
 
@@ -29,14 +22,14 @@ request.onsuccess = function(event) {
 
 request.onerror = function(event) {
   // log error here
-  console.log(event);
+  console.log(event.target.errorCode);
 };
 
+// saveRecord() is used when offline.
 function saveRecord(record) {
   // create a transaction on the pending db with readwrite access
   // access your pending object store
   // add record to your store with add method.
-  const db = request.result;
   const transaction = db.transaction(["pending"], "readwrite");
   const pendingStore = transaction.objectStore("pending");
   // const recordIndex = pendingStore.index("recordIndex");
@@ -45,6 +38,9 @@ function saveRecord(record) {
   pendingStore.add(record);
 }
 
+// checkDatabase() fetches all records placed in the IndexedDB
+// 'budget' database and tries to post them on the server.
+// if successful, the records are cleared from 'budget'.
 function checkDatabase() {
   // open a transaction on your pending db
   // access your pending object store
@@ -68,6 +64,10 @@ function checkDatabase() {
           // if successful, open a transaction on your pending db
           // access your pending object store
           // clear all items in your store
+          // delete records if successful
+          const transaction = db.transaction(["pending"], "readwrite");
+          const pendingStore = transaction.objectStore("pending");
+          pendingStore.clear();
       });
     }
   };

@@ -19,9 +19,10 @@ label {
 }
 
 input {
-  border: 2px solid transparent;
+  border: 2px solid green;
   border-radius: 6px;
   padding: .4em .8em;
+  margin-top: 5px;
   background-color: #E2E8F0;
 }
 

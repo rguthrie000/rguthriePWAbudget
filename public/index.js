@@ -1,3 +1,5 @@
+// Budget Tracker - logic support and graphic for the main page.
+
 let transactions = [];
 let myChart;
 
